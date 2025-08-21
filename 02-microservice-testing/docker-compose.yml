@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/testdb
+      - EXTERNAL_API_URL=http://mock-server:8001
+    depends_on:
+      - db
+      - mock-server
+    volumes:
+      - ./app:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mock-server:
+    build: ./mocks
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./mocks/responses:/app/responses
+    command: python mock_server.py
+
+  tests:
+    build: ./tests
+    environment:
+      - APP_URL=http://app:8000
+      - DB_URL=postgresql://user:password@db:5432/testdb
+    depends_on:
+      - app
+      - db
+      - mock-server
+    volumes:
+      - ./tests:/app/tests
+      - ./reports:/app/reports
+    command: pytest /app/tests -v --allure-dir=/app/reports
+
+volumes:
+  postgres_data:

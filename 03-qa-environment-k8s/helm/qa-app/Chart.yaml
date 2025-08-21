@@ -1,0 +1,14 @@
+apiVersion: v2
+name: qa-app
+description: QA Environment Application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - qa
+  - testing
+  - workshop
+home: https://github.com/qa-team/qa-devops-workshop
+maintainers:
+  - name: QA Team
+    email: qa-team@company.com

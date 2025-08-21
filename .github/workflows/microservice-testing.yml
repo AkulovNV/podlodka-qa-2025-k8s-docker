@@ -1,0 +1,54 @@
+name: Microservice Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: ['02-microservice-testing/**']
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create network
+      run: docker network create qa-network
+    
+    - name: Start services
+      run: |
+        cd 02-microservice-testing
+        docker-compose up -d --build
+    
+    - name: Wait for services
+      run: |
+        timeout 60 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
+    
+    - name: Run integration tests
+      run: |
+        cd 02-microservice-testing
+        docker-compose run --rm tests
+    
+    - name: Collect logs
+      if: always()
+      run: |
+        cd 02-microservice-testing
+        docker-compose logs > logs/services.log
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        cd 02-microservice-testing
+        docker-compose down -v
+        docker network rm qa-network
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: integration-test-results
+        path: |
+          02-microservice-testing/reports/
+          02-microservice-testing/logs/

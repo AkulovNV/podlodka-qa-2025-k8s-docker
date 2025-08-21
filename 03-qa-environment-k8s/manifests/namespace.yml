@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qa-environment
+  labels:
+    purpose: qa-testing
+    environment: qa
+    managed-by: qa-team

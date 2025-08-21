@@ -1,0 +1,44 @@
+name: Tests in Container
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: ['01-tests-in-container/**']
+  pull_request:
+    branches: [ main ]
+    paths: ['01-tests-in-container/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build test container
+      run: |
+        cd 01-tests-in-container
+        docker build -t qa-tests .
+    
+    - name: Run tests
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}/reports:/app/reports \
+          qa-tests \
+          python -m pytest tests/ -v --allure-dir=/app/reports --html=/app/reports/report.html
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: reports/
+        retention-days: 30
+    
+    - name: Publish test results
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Test Results
+        path: reports/junit.xml
+        reporter: java-junit
