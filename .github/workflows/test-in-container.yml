@@ -3,10 +3,14 @@ name: Tests in Container
 on:
   push:
     branches: [ main ]
-    paths: ['01-tests-in-container/**']
+    paths:
+      - '01-tests-in-container/**'
+      - .github/workflows/test-in-container.yml
   pull_request:
     branches: [ main ]
-    paths: ['01-tests-in-container/**']
+    paths:
+      - '01-tests-in-container/**'
+      - .github/workflows/test-in-container.yml
 
 jobs:
   test:
