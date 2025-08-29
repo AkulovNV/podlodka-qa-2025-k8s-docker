@@ -24,8 +24,7 @@ jobs:
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/reports:/app/reports \
-          qa-tests \
-          python -m pytest tests/ -v --allure-dir=/app/reports --html=/app/reports/report.html
+          qa-tests
     
     - name: Upload test results
       uses: actions/upload-artifact@v4
