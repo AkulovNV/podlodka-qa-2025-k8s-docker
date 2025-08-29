@@ -46,7 +46,7 @@ jobs:
       if: always()
       run: |
         cd 02-microservice-testing
-        docker-compose down -v
+        docker compose down -v
         docker network rm qa-network
     
     - name: Upload artifacts
