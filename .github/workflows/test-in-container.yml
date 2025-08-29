@@ -2,7 +2,7 @@ name: Tests in Container
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
     paths: ['01-tests-in-container/**']
   pull_request:
     branches: [ main ]
@@ -28,7 +28,7 @@ jobs:
           python -m pytest tests/ -v --allure-dir=/app/reports --html=/app/reports/report.html
     
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results
@@ -36,7 +36,7 @@ jobs:
         retention-days: 30
     
     - name: Publish test results
-      uses: dorny/test-reporter@v1
+      uses: dorny/test-reporter@v1.8.0
       if: success() || failure()
       with:
         name: Test Results

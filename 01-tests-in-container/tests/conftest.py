@@ -1,5 +1,3 @@
-# Обновленный файл: 01-tests-in-container/tests/conftest.py
-
 import pytest
 import os
 import sys
