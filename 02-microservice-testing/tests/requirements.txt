@@ -1,0 +1,5 @@
+pytest==7.4.3
+requests==2.31.0
+pytest-html==4.1.1
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23

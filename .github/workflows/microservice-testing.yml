@@ -2,11 +2,16 @@ name: Microservice Testing
 
 on:
   push:
-    branches: [ main, develop ]
-    paths: ['02-microservice-testing/**']
+    branches: [ main ]
+    paths:
+      - '02-microservice-testing/**'
+      - .github/workflows/microservice-testing.yml
   pull_request:
     branches: [ main ]
-
+    paths:
+      - '02-microservice-testing/**'
+      - .github/workflows/microservice-testing.yml
+      
 jobs:
   integration-test:
     runs-on: ubuntu-latest

@@ -1,52 +1,106 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d testdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - qa-network
+
+  mock-server:
+    build:
+      context: ./mocks
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./mocks/responses:/app/responses:ro
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - qa-network
+    labels:
+      - "workshop=qa-devops"
+      - "component=mock-server"
+
   app:
-    build: ./app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/testdb
       - EXTERNAL_API_URL=http://mock-server:8001
+      - PYTHONPATH=/app
     depends_on:
-      - db
-      - mock-server
+      db:
+        condition: service_healthy
+      mock-server:
+        condition: service_healthy
     volumes:
       - ./app:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: testdb
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  mock-server:
-    build: ./mocks
-    ports:
-      - "8001:8001"
-    volumes:
-      - ./mocks/responses:/app/responses
-    command: python mock_server.py
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - qa-network
+    labels:
+      - "workshop=qa-devops"
+      - "component=main-app"
 
   tests:
-    build: ./tests
+    build:
+      context: ./tests
+      dockerfile: Dockerfile
     environment:
       - APP_URL=http://app:8000
-      - DB_URL=postgresql://user:password@db:5432/testdb
+      - MOCK_URL=http://mock-server:8001
+      - DATABASE_URL=postgresql://user:password@db:5432/testdb
+      - PYTHONPATH=/app
     depends_on:
-      - app
-      - db
-      - mock-server
+      app:
+        condition: service_healthy
+      mock-server:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     volumes:
       - ./tests:/app/tests
       - ./reports:/app/reports
-    command: pytest /app/tests -v --allure-dir=/app/reports
+    networks:
+      - qa-network
+    labels:
+      - "workshop=qa-devops"
+      - "component=tests"
 
 volumes:
   postgres_data:
+
+networks:
+  qa-network:
+    driver: bridge
+    labels:
+      - "workshop=qa-devops"
