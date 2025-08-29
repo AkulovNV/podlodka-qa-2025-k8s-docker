@@ -43,10 +43,10 @@ jobs:
         path: reports/
         retention-days: 30
     
-    - name: Publish test results
-      uses: dorny/test-reporter@v1.8.0
-      if: success() || failure()
-      with:
-        name: Test Results
-        path: reports/ui/junit.xml
-        reporter: java-junit
+    # - name: Publish test results
+    #   uses: dorny/test-reporter@v1.8.0
+    #   if: success() || failure()
+    #   with:
+    #     name: Test Results
+    #     path: reports/ui/junit.xml
+    #     reporter: java-junit
