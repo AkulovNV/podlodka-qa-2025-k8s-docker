@@ -65,12 +65,12 @@
 
 | Компонент | Docker Compose | Kubernetes |
 |-----------|---------------|------------|
-| **База данных** | сервис `db` | `postgres` Deployment + Service + PVC |
+| **База данных** | сервис `db` | `postgres` Deployment + Service + emptyDir |
 | **Mock Server** | сервис `mock-server` | `mock-server` Deployment + Service |
 | **Основное приложение** | сервис `app` | `app` Deployment + Service (ClusterIP + NodePort) |
 | **Тесты** | сервис `tests` | `tests` Job |
 | **Конфигурация** | Переменные окружения | ConfigMaps + Secrets |
-| **Постоянство данных** | Именованный том | PersistentVolumeClaim |
+| **Постоянство данных** | Именованный том | emptyDir (временное) |
 | **Сеть** | Bridge-сеть | Кластерная сеть + DNS |
 
 ## Управление конфигурацией

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Kubernetes deployment script for microservice testing environment
+# Скрипт деплоя приложений на которых будут запускаться тесты
 set -e
 
 echo "🚀 Deploying Microservice Testing Environment to Kubernetes"
@@ -32,13 +32,6 @@ wait_for_job() {
     echo "⏳ Waiting for job $job to complete..."
     kubectl wait --for=condition=complete --timeout=300s job/$job -n $namespace
 }
-
-echo "📋 Building Docker images first (if not already built)..."
-cd "$(dirname "$0")/.."
-if ! docker images | grep -q "02-microservice-testing-app"; then
-    echo "🔨 Building Docker images..."
-    docker-compose build
-fi
 
 echo "📦 Deploying Kubernetes resources..."
 

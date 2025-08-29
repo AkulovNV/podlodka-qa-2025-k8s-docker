@@ -22,8 +22,8 @@ spec:
     spec:
       containers:
       - name: app
-        image: 02-microservice-testing-app:latest
-        imagePullPolicy: Never  # For local development with docker-compose built images
+        image: cr.yandex/crp8fh8qsgbjccrgdjdj/qa-devops/tests-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
           name: http

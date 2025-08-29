@@ -22,8 +22,8 @@ spec:
     spec:
       containers:
       - name: mock-server
-        image: 02-microservice-testing-mock-server:latest
-        imagePullPolicy: Never  # For local development with docker-compose built images
+        image: cr.yandex/crp8fh8qsgbjccrgdjdj/qa-devops/tests-mocks:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8001
           name: http

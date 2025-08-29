@@ -38,7 +38,7 @@ validate_manifest() {
 echo "🔍 Validating all manifest files..."
 echo ""
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/k8s"
 
 for file in *.yaml; do
     validate_manifest "$file"
@@ -76,4 +76,4 @@ echo ""
 echo "✅ All manifests are valid and ready for deployment!"
 echo ""
 echo "🚀 To deploy, run: ./deploy.sh"
-echo "📋 To see what will be deployed: kubectl apply --dry-run=server -f ."
+echo "📋 To see what will be deployed: kubectl apply --dry-run=server -f k8s/"

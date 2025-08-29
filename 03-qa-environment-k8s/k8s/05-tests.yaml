@@ -19,8 +19,8 @@ spec:
       restartPolicy: Never
       containers:
       - name: tests
-        image: 02-microservice-testing-tests:latest
-        imagePullPolicy: Never  # For local development with docker-compose built images
+        image: cr.yandex/crp8fh8qsgbjccrgdjdj/qa-devops/tests-tests:latest
+        imagePullPolicy: Always
         env:
         - name: DATABASE_URL
           value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
