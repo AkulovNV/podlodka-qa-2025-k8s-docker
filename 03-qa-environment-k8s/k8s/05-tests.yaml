@@ -1,0 +1,85 @@
+# Tests Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tests
+  namespace: qa-microservice-testing
+  labels:
+    app: tests
+    workshop: qa-devops
+    component: tests
+spec:
+  template:
+    metadata:
+      labels:
+        app: tests
+        workshop: qa-devops
+        component: tests
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: tests
+        image: 02-microservice-testing-tests:latest
+        imagePullPolicy: Never  # For local development with docker-compose built images
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: database
+        envFrom:
+        - configMapRef:
+            name: tests-config
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Waiting for services to be ready..."
+          until curl -f http://app:8000/ready; do
+            echo "Waiting for app to be ready..."
+            sleep 5
+          done
+          until curl -f http://mock-server:8001/health; do
+            echo "Waiting for mock-server to be ready..."
+            sleep 5
+          done
+          echo "All services ready, running tests..."
+          pytest -v /app/tests/ --tb=short
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      initContainers:
+      - name: wait-for-services
+        image: curlimages/curl:latest
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for app service..."
+          until curl -f http://app:8000/health; do
+            echo "App not ready, waiting..."
+            sleep 10
+          done
+          echo "Waiting for mock-server service..."
+          until curl -f http://mock-server:8001/health; do
+            echo "Mock server not ready, waiting..."
+            sleep 10
+          done
+          echo "All services are ready!"
+  backoffLimit: 3

@@ -1,0 +1,84 @@
+# Mock Server Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-server
+  namespace: qa-microservice-testing
+  labels:
+    app: mock-server
+    workshop: qa-devops
+    component: mock-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mock-server
+  template:
+    metadata:
+      labels:
+        app: mock-server
+        workshop: qa-devops
+        component: mock-server
+    spec:
+      containers:
+      - name: mock-server
+        image: 02-microservice-testing-mock-server:latest
+        imagePullPolicy: Never  # For local development with docker-compose built images
+        ports:
+        - containerPort: 8001
+          name: http
+        envFrom:
+        - configMapRef:
+            name: mock-server-config
+        volumeMounts:
+        - name: responses
+          mountPath: /app/responses
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: responses
+        configMap:
+          name: mock-server-responses
+
+---
+# Mock Server Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-server
+  namespace: qa-microservice-testing
+  labels:
+    app: mock-server
+    workshop: qa-devops
+    component: mock-server
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8001
+    targetPort: 8001
+    protocol: TCP
+    name: http
+  selector:
+    app: mock-server

@@ -1,0 +1,144 @@
+# Main Application Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: qa-microservice-testing
+  labels:
+    app: main-app
+    workshop: qa-devops
+    component: main-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-app
+  template:
+    metadata:
+      labels:
+        app: main-app
+        workshop: qa-devops
+        component: main-app
+    spec:
+      containers:
+      - name: app
+        image: 02-microservice-testing-app:latest
+        imagePullPolicy: Never  # For local development with docker-compose built images
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: database
+        envFrom:
+        - configMapRef:
+            name: app-config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: database
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres -p 5432 -U $POSTGRES_USER -d $POSTGRES_DB; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          echo "PostgreSQL is ready!"
+
+---
+# Main Application Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  namespace: qa-microservice-testing
+  labels:
+    app: main-app
+    workshop: qa-devops
+    component: main-app
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: main-app
+
+---
+# Main Application Service (NodePort for external access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-external
+  namespace: qa-microservice-testing
+  labels:
+    app: main-app
+    workshop: qa-devops
+    component: main-app
+spec:
+  type: NodePort
+  ports:
+  - port: 8000
+    targetPort: 8000
+    nodePort: 30080
+    protocol: TCP
+    name: http
+  selector:
+    app: main-app
