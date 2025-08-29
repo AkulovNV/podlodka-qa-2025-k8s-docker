@@ -24,12 +24,17 @@ jobs:
         cd 01-tests-in-container
         docker build -t qa-tests .
     
-    - name: Run tests
+    - name: Run API tests
       run: |
         docker run --rm \
-          -v ${{ github.workspace }}/reports:/app/reports \
-          qa-tests
-    
+          -v ${{ github.workspace }}/reports/api:/app/reports \
+          qa-tests api
+
+    - name: Run UI tests
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}/reports/ui:/app/reports \
+          qa-tests ui
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()
@@ -43,5 +48,5 @@ jobs:
       if: success() || failure()
       with:
         name: Test Results
-        path: reports/junit.xml
+        path: reports/ui/junit.xml
         reporter: java-junit

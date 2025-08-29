@@ -36,11 +36,15 @@ COPY . .
 # Создание директории для отчетов
 RUN mkdir -p /app/reports
 
-# Команда по умолчанию
-CMD ["python", "-m", "pytest", "tests/", "-v", \
-     "--html=/app/reports/report.html", \
-     "--self-contained-html", \
-     "--junit-xml=/app/reports/junit.xml"]
+# Копируем и делаем исполняемым entrypoint скрипт
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Устанавливаем entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# Команда по умолчанию (можно переопределить при запуске)
+CMD ["all"]
 
 # Добавляем метки
 LABEL workshop=qa-devops \

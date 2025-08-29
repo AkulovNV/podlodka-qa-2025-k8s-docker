@@ -14,12 +14,12 @@ class TestGoogleSearch:
         
         # Согласие на cookies (если появится)
         try:
-            consent_button = WebDriverWait(driver, 3).until(
+            consent_button = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.ID, "L2AGLb"))
             )
             consent_button.click()
-        except:
-            pass  # Кнопка может не появиться
+        except TimeoutException:
+            pass  # Кнопка может не появиться или не успеть появиться за 5 секунд
         
         # Поиск
         search_box = driver.find_element(By.NAME, "q")
@@ -28,7 +28,7 @@ class TestGoogleSearch:
         
         # Проверка результатов
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "search"))
+            EC.presence_of_element_located((By.ID, "rso"))
         )
         
         results = driver.find_elements(By.CSS_SELECTOR, "h3")
