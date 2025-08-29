@@ -25,7 +25,7 @@ jobs:
     - name: Start services
       run: |
         cd 02-microservice-testing
-        docker-compose up -d --build
+        docker compose up -d --build
     
     - name: Wait for services
       run: |
@@ -34,13 +34,13 @@ jobs:
     - name: Run integration tests
       run: |
         cd 02-microservice-testing
-        docker-compose run --rm tests
+        docker compose run --rm tests
     
     - name: Collect logs
       if: always()
       run: |
         cd 02-microservice-testing
-        docker-compose logs > logs/services.log
+        docker compose logs > logs/services.log
     
     - name: Cleanup
       if: always()
