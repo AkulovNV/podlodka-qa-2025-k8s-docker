@@ -1,0 +1,52 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice Johnson",
+      "email": "alice@example.com",
+      "phone": "+1-555-0101",
+      "address": {
+        "street": "123 Main St",
+        "city": "Anytown",
+        "state": "CA",
+        "zip": "12345"
+      },
+      "preferences": {
+        "notifications": true,
+        "newsletter": false
+      }
+    },
+    {
+      "id": 2,
+      "name": "Bob Smith",
+      "email": "bob@example.com", 
+      "phone": "+1-555-0102",
+      "address": {
+        "street": "456 Oak Ave",
+        "city": "Another City",
+        "state": "NY",
+        "zip": "67890"
+      },
+      "preferences": {
+        "notifications": false,
+        "newsletter": true
+      }
+    },
+    {
+      "id": 3,
+      "name": "Carol Davis",
+      "email": "carol@example.com",
+      "phone": "+1-555-0103",
+      "address": {
+        "street": "789 Pine Rd",
+        "city": "Third Town",
+        "state": "TX",
+        "zip": "11111"
+      },
+      "preferences": {
+        "notifications": true,
+        "newsletter": true
+      }
+    }
+  ]
+}

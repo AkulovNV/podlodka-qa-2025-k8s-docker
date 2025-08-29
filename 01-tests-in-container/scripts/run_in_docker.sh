@@ -1,8 +1,5 @@
-# ===========================================
-# Файл: 01-tests-in-container/scripts/run_in_docker.sh
-# ===========================================
-
 #!/bin/bash
+
 set -e
 
 echo "🐳 Запуск тестов в Docker контейнере..."
@@ -74,19 +71,11 @@ docker rm $CONTAINER_NAME 2>/dev/null || true
 
 # Запуск контейнера с монтированием volume для отчетов
 docker run --name $CONTAINER_NAME \
-    --rm \
     -v "$(pwd)/reports:/app/reports" \
     -e "TEST_ENV=docker" \
     -e "CI=true" \
-    $IMAGE_NAME \
-    python -m pytest tests/ \
-        -v \
-        --tb=short \
-        --html=/app/reports/report.html \
-        --self-contained-html \
-        --junit-xml=/app/reports/junit.xml \
-        --allure-dir=/app/reports/allure || {
-    
+    $IMAGE_NAME || {
+
     log_error "Тесты завершились с ошибками"
     log_info "Проверьте отчеты в reports/"
     

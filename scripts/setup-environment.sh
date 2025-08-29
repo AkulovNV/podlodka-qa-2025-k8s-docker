@@ -64,8 +64,8 @@ if [[ -f "01-tests-in-container/requirements.txt" ]]; then
 fi
 
 # Установка дополнительных пакетов для разработки
-pip install docker-compose requests pyyaml
-log_success "Дополнительные пакеты установлены"
+# pip install docker-compose requests pyyaml
+# log_success "Дополнительные пакеты установлены"
 
 log_info "Шаг 4: Настройка Docker образов..."
 # Скачиваем базовые образы

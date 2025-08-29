@@ -8,7 +8,7 @@ keywords:
   - qa
   - testing
   - workshop
-home: https://github.com/qa-team/qa-devops-workshop
+home: https://github.com/AkulovNV/podlodka-qa-2025-k8s-docker
 maintainers:
-  - name: QA Team
-    email: qa-team@company.com
+  - name: Nikolai Akulov
+    email: akulovnv@gmail.com
