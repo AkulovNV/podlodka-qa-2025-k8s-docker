@@ -22,8 +22,6 @@ spec:
         image: cr.yandex/crp8fh8qsgbjccrgdjdj/qa-devops/tests-tests:latest
         imagePullPolicy: Always
         env:
-        - name: DATABASE_URL
-          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
@@ -39,24 +37,29 @@ spec:
             secretKeyRef:
               name: postgres-secret
               key: database
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: database_url
         envFrom:
         - configMapRef:
             name: tests-config
-        command: ["/bin/sh"]
-        args:
-        - -c
-        - |
-          echo "Waiting for services to be ready..."
-          until curl -f http://app:8000/ready; do
-            echo "Waiting for app to be ready..."
-            sleep 5
-          done
-          until curl -f http://mock-server:8001/health; do
-            echo "Waiting for mock-server to be ready..."
-            sleep 5
-          done
-          echo "All services ready, running tests..."
-          pytest -v /app/tests/ --tb=short
+        # command: ["/bin/sh"]
+        # args:
+        # - -c
+        # - |
+        #   echo "Waiting for services to be ready..."
+        #   until curl -f http://app:8000/ready; do
+        #     echo "Waiting for app to be ready..."
+        #     sleep 5
+        #   done
+        #   until curl -f http://mock-server:8001/health; do
+        #     echo "Waiting for mock-server to be ready..."
+        #     sleep 5
+        #   done
+        #   echo "All services ready, running tests..."
+        #   pytest -v /app/tests/ --tb=short
         resources:
           requests:
             memory: "128Mi"

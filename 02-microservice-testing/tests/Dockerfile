@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /app/reports /app/logs
+RUN mkdir -p /app/reports /app/logs /app/tests
 
 CMD ["python", "-m", "pytest", "/app/tests", "-v", \
      "--html=/app/reports/integration-report.html", \

@@ -45,25 +45,6 @@ for file in *.yaml; do
 done
 
 echo ""
-echo "🎯 Checking Docker images availability..."
-
-# Check if docker images exist
-images=(
-    "02-microservice-testing-app:latest"
-    "02-microservice-testing-mock-server:latest" 
-    "02-microservice-testing-tests:latest"
-)
-
-for image in "${images[@]}"; do
-    if docker images | grep -q "${image%:*}"; then
-        echo "✅ $image is available"
-    else
-        echo "⚠️  $image is not built yet"
-        echo "   Run 'docker-compose build' to build required images"
-    fi
-done
-
-echo ""
 echo "📊 Cluster resource check..."
 echo "Nodes:"
 kubectl get nodes --no-headers 2>/dev/null | wc -l | xargs echo "  Available nodes:"
