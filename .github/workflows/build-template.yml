@@ -1,0 +1,101 @@
+name: Build Images
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      registry:
+        required: false
+        type: string
+        default: cr.yandex
+      registry-path:
+        required: false
+        type: string
+        default: crp8fh8qsgbjccrgdjdj
+      app-name:
+        required: false
+        type: string
+        default: qa-devops
+      helm-chart-path:
+        required: false
+        type: string
+        default: 03-qa-environment-k8s/helm/app
+      cluster-name:
+        required: true
+        type: string
+    secrets:
+      YC_IAM_TOKEN:
+        required: true
+      # YC_SA_KEY_BASE64:
+      #   required: true
+
+concurrency:
+  group: deploy-${{ github.workflow }}-${{ inputs.environment }}
+  cancel-in-progress: true
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-tag.outputs.version }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set TAG output
+      id: set-tag
+      run: |
+        TAG=$(git describe --tags 2>/dev/null || git rev-parse --short HEAD)
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [version]
+    env:
+      REGISTRY: ${{ inputs.registry }}
+      IMAGE_NAME: ${{ inputs.registry-path }}/${{ inputs.app-name }}/${{ inputs.environment }}
+      TAG: ${{ needs.version.outputs.version }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker login to Yandex Registry
+      run: |
+        echo "${{ secrets.YC_IAM_TOKEN }}" | docker login -u iam --password-stdin $REGISTRY
+
+    - name: Build and push app image to registry
+      run: |
+        docker buildx build \
+          --platform linux/amd64 \
+          --cache-from=type=registry,ref=$REGISTRY/$IMAGE_NAME-app:buildcache \
+          --cache-to=type=registry,ref=$REGISTRY/$IMAGE_NAME-app:buildcache,mode=max \
+          -t $REGISTRY/$IMAGE_NAME-app:$TAG \
+          -t $REGISTRY/$IMAGE_NAME-app:latest \
+          --push ./02-microservice-testing/app
+
+    - name: Build and push mocks image to registry
+      run: |
+        docker buildx build \
+          --platform linux/amd64 \
+          --cache-from=type=registry,ref=$REGISTRY/$IMAGE_NAME-mocks:buildcache \
+          --cache-to=type=registry,ref=$REGISTRY/$IMAGE_NAME-mocks:buildcache,mode=max \
+          -t $REGISTRY/$IMAGE_NAME-mocks:$TAG \
+          -t $REGISTRY/$IMAGE_NAME-mocks:latest \
+          --push ./02-microservice-testing/mocks
+
+    - name: Build and push tests image to registry
+      run: |
+        docker buildx build \
+          --platform linux/amd64 \
+          --cache-from=type=registry,ref=$REGISTRY/$IMAGE_NAME-tests:buildcache \
+          --cache-to=type=registry,ref=$REGISTRY/$IMAGE_NAME-tests:buildcache,mode=max \
+          -t $REGISTRY/$IMAGE_NAME-tests:$TAG \
+          -t $REGISTRY/$IMAGE_NAME-tests:latest \
+          --push ./02-microservice-testing/tests

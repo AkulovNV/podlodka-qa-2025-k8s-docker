@@ -1,0 +1,19 @@
+name: Deploy tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '03-qa-environment-k8s/**'
+      - '01-microservice-testing/**'
+      - '02-microservice-testing/**'
+      - .github/workflows/build-template.yml
+      - .github/workflows/k8s-tests.yml
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      environment: tests
+      cluster-name: podlodka-test-cluster
+    secrets: inherit
