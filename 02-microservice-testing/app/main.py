@@ -131,7 +131,7 @@ def get_user_orders(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.post("/orders")
+@app.post("/orders", status_code=201)
 def create_order(order_data: dict, db: Session = Depends(get_db)):
     """Создать заказ"""
     try:

@@ -44,16 +44,16 @@ def test_create_and_get_user():
     """Тест создания и получения пользователя"""
     # Создаем пользователя
     user_data = {
-        "name": "Test User",
-        "email": "test@example.com"
+        "name": "Simple Test User",
+        "email": "simple-test@example.com"
     }
     
     response = requests.post("http://app:8000/users", json=user_data)
     assert response.status_code == 200
     
     created_user = response.json()
-    assert created_user["name"] == "Test User"
-    assert created_user["email"] == "test@example.com"
+    assert created_user["name"] == "Simple Test User"
+    assert created_user["email"] == "simple-test@example.com"
     assert "id" in created_user
     
     # Получаем всех пользователей
@@ -62,7 +62,7 @@ def test_create_and_get_user():
     
     users = response.json()
     assert len(users) >= 1
-    assert any(user["email"] == "test@example.com" for user in users)
+    assert any(user["email"] == "simple-test@example.com" for user in users)
 
 
 def test_mock_orders():

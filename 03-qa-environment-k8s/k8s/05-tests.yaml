@@ -43,23 +43,12 @@ spec:
               name: postgres-secret
               key: database_url
         envFrom:
-        - configMapRef:
-            name: tests-config
-        # command: ["/bin/sh"]
-        # args:
-        # - -c
-        # - |
-        #   echo "Waiting for services to be ready..."
-        #   until curl -f http://app:8000/ready; do
-        #     echo "Waiting for app to be ready..."
-        #     sleep 5
-        #   done
-        #   until curl -f http://mock-server:8001/health; do
-        #     echo "Waiting for mock-server to be ready..."
-        #     sleep 5
-        #   done
-        #   echo "All services ready, running tests..."
-        #   pytest -v /app/tests/ --tb=short
+          - configMapRef:
+              name: tests-config
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - pytest -v /app/ --html=/app/reports/integration-report.html --self-contained-html --junit-xml=/app/reports/integration-junit.xml
         resources:
           requests:
             memory: "128Mi"
@@ -85,4 +74,4 @@ spec:
             sleep 10
           done
           echo "All services are ready!"
-  backoffLimit: 3
+  backoffLimit: 2
