@@ -84,7 +84,7 @@ log_info "Шаг 6: Настройка разрешений..."
 chmod +x scripts/*.sh
 chmod +x 01-tests-in-container/scripts/*.sh
 chmod +x 02-microservice-testing/scripts/*.sh  
-chmod +x 03-qa-environment-k8s/scripts/*.sh
+chmod +x 03-qa-environment-k8s/*.sh
 log_success "Разрешения на выполнение установлены"
 
 log_info "Шаг 7: Проверка конфигураций..."
